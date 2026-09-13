@@ -10,7 +10,7 @@ import psutil
 
 # --- Setup, Configuration & State ---
 session_minutes = 0
-next_break_threshold = 180  # Change to 5 for quick testing
+next_break_threshold = 90 # Change to 5 for quick testing
 stress_score = 0
 backspace_burst = 0
 session_start_time = datetime.now()
@@ -90,7 +90,7 @@ def prompt_user_break():
     
     if wants_to_stop:
         session_minutes = 0
-        next_break_threshold = 180
+        next_break_threshold = 90
         notification.notify(
             title="CrunchGuard: Break Started",
             message="Great job! Step away from the screen and stretch.",
