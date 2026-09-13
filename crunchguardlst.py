@@ -4,41 +4,15 @@ from tkinter import messagebox, simpledialog
 from plyer import notification
 from pynput import keyboard
 from datetime import datetime
-import json
-import os
 
-# --- Setup, Configuration & State ---
+# --- Phase 0: Setup, Configuration & State ---
 session_minutes = 0
 next_break_threshold = 180  # Default 3-hour limit (change to e.g., 5-10 for testing)
 stress_score = 0
 backspace_burst = 0
 session_start_time = datetime.now()
-LOG_FILE = "crunchguard_log.json"
 
-# --- Productivity Logging Function ---
-def save_session_log(total_minutes, stress_count):
-    today_date = datetime.now().strftime("%Y-%m-%d")
-    log_entry = {
-        "date": today_date,
-        "active_minutes": total_minutes,
-        "stress_spikes_detected": stress_count,
-        "timestamp": datetime.now().strftime("%H:%M:%S")
-    }
-    
-    data = []
-    if os.path.exists(LOG_FILE):
-        try:
-            with open(LOG_FILE, "r") as f:
-                data = json.load(f)
-        except json.JSONDecodeError:
-            data = []
-            
-    data.append(log_entry)
-    with open(LOG_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-    print(f"\n[CrunchGuard] Session saved to {LOG_FILE}: {total_minutes} mins tracked.")
-
-# --- Background Keystroke Listener (Stress Detection) ---
+# --- Phase 2: Background Keystroke Listener (Stress Detection) ---
 def on_press(key):
     global stress_score, backspace_burst
     try:
@@ -53,19 +27,21 @@ def on_press(key):
     except Exception:
         pass
 
-# Start the global keyboard listener in a background daemon thread
+# Start the global keyboard listener in a background thread
 listener = keyboard.Listener(on_press=on_press)
 listener.daemon = True
 listener.start()
 
-# --- Interactive UI Prompts (Tkinter Break Manager) ---
+# --- Phase 3: Interactive UI Prompts (Tkinter Break Manager) ---
 def prompt_user_break():
     global session_minutes, next_break_threshold
     
+    # Initialize a temporary, hidden root window for native system pop-ups
     root = tk.Tk()
     root.withdraw() 
     root.attributes('-topmost', True) 
 
+    # Prompt 1: Check if user wants to take a break
     wants_to_stop = messagebox.askyesno(
         "CrunchGuard: Strain Alert", 
         "You've been coding continuously for a long time. Ready to stop and take a break?",
@@ -82,6 +58,7 @@ def prompt_user_break():
             timeout=5
         )
     else:
+        # Prompt 2: Custom Snooze/Reminder Input
         snooze_time = simpledialog.askinteger(
             "CrunchGuard: Custom Reminder", 
             "In how many minutes should I remind you again?", 
@@ -92,7 +69,7 @@ def prompt_user_break():
         )
         
         if snooze_time is None:
-            snooze_time = 60  
+            snooze_time = 60  # Failsafe fallback if dialog is closed
             
         next_break_threshold = session_minutes + snooze_time
         print(f"[CrunchGuard] Snoozed for {snooze_time} minutes.")
@@ -100,11 +77,11 @@ def prompt_user_break():
     root.destroy()
 
 print("=" * 50)
-print("CrunchGuard v1.1 Active: Monitoring background time, keystrokes & logging.")
+print("CrunchGuard v1.0 Active: Monitoring background time & keystrokes.")
 print(f"Session started at: {session_start_time.strftime('%H:%M:%S')}")
 print("=" * 50)
 
-# --- Main Tracking Loop ---
+# --- Phase 1: Main Tracking Loop ---
 try:
     while True:
         # NOTE: time.sleep(1) simulates 1 minute per second for rapid hackathon testing.
@@ -112,9 +89,11 @@ try:
         time.sleep(1) 
         session_minutes += 1
         
+        # Check if session duration has hit the break threshold
         if session_minutes >= next_break_threshold:
             prompt_user_break()
         
+        # Check if cumulative typing frustration/stress has crossed the threshold
         if stress_score >= 50:
             notification.notify(
                 title="CrunchGuard: Frustration Spike",
@@ -122,9 +101,7 @@ try:
                 app_name="CrunchGuard",
                 timeout=10
             )
-            stress_score = 0  
+            stress_score = 0  # Reset score after alert
 
 except KeyboardInterrupt:
-    save_session_log(session_minutes, stress_score)
     print("\n[CrunchGuard] Shutting down safely. Keep crushing your project!")
-    
