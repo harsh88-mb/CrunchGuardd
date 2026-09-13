@@ -6,22 +6,39 @@ from pynput import keyboard
 from datetime import datetime
 import json
 import os
+import psutil
 
 # --- Setup, Configuration & State ---
 session_minutes = 0
-next_break_threshold = 180  # Default 3-hour limit (change to e.g., 5-10 for testing)
+next_break_threshold = 180  # Change to 5 for quick testing
 stress_score = 0
 backspace_burst = 0
 session_start_time = datetime.now()
 LOG_FILE = "crunchguard_log.json"
 
+# --- Active IDE Detection ---
+def check_active_ide():
+    ide_processes = ["code.exe", "pycharm64.exe", "devenv.exe", "sublime_text.exe", "code"]
+    detected_ides = []
+    for proc in psutil.process_iter(['name']):
+        try:
+            name = proc.info['name']
+            if name and name.lower() in [ide.lower() for ide in ide_processes]:
+                if name not in detected_ides:
+                    detected_ides.append(name)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return detected_ides
+
 # --- Productivity Logging Function ---
 def save_session_log(total_minutes, stress_count):
     today_date = datetime.now().strftime("%Y-%m-%d")
+    active_ides = check_active_ide()
     log_entry = {
         "date": today_date,
         "active_minutes": total_minutes,
         "stress_spikes_detected": stress_count,
+        "detected_ides": active_ides,
         "timestamp": datetime.now().strftime("%H:%M:%S")
     }
     
@@ -36,9 +53,9 @@ def save_session_log(total_minutes, stress_count):
     data.append(log_entry)
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=4)
-    print(f"\n[CrunchGuard] Session saved to {LOG_FILE}: {total_minutes} mins tracked.")
+    print(f"\n[CrunchGuard] Session saved to {LOG_FILE}: {total_minutes} mins tracked. IDEs: {active_ides}")
 
-# --- Background Keystroke Listener (Stress Detection) ---
+# --- Background Keystroke Listener ---
 def on_press(key):
     global stress_score, backspace_burst
     try:
@@ -53,12 +70,11 @@ def on_press(key):
     except Exception:
         pass
 
-# Start the global keyboard listener in a background daemon thread
 listener = keyboard.Listener(on_press=on_press)
 listener.daemon = True
 listener.start()
 
-# --- Interactive UI Prompts (Tkinter Break Manager) ---
+# --- Interactive UI Prompts ---
 def prompt_user_break():
     global session_minutes, next_break_threshold
     
@@ -100,15 +116,13 @@ def prompt_user_break():
     root.destroy()
 
 print("=" * 50)
-print("CrunchGuard v1.1 Active: Monitoring background time, keystrokes & logging.")
+print("CrunchGuard v1.2 Active: Monitoring time, keystrokes & IDE tracking.")
 print(f"Session started at: {session_start_time.strftime('%H:%M:%S')}")
 print("=" * 50)
 
 # --- Main Tracking Loop ---
 try:
     while True:
-        # NOTE: time.sleep(1) simulates 1 minute per second for rapid hackathon testing.
-        # Change to time.sleep(60) for real-time tracking (1 tick = 1 real minute).
         time.sleep(1) 
         session_minutes += 1
         
@@ -127,4 +141,3 @@ try:
 except KeyboardInterrupt:
     save_session_log(session_minutes, stress_score)
     print("\n[CrunchGuard] Shutting down safely. Keep crushing your project!")
-    
