@@ -10,7 +10,7 @@ import psutil
 
 # --- Setup, Configuration & State ---
 session_minutes = 0
-next_break_threshold = 90 # Change to 5 for quick testing
+next_break_threshold = 90 # Change to 5 for quick testinggit 
 stress_score = 0
 backspace_burst = 0
 session_start_time = datetime.now()
