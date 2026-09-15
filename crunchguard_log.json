@@ -1,32 +1,8 @@
 [
     {
-        "date": "2026-09-13",
-        "active_minutes": 168,
-        "stress_spikes_detected": 0,
-        "timestamp": "13:20:35"
-    },
-    {
-        "date": "2026-09-13",
-        "active_minutes": 25,
-        "stress_spikes_detected": 0,
-        "timestamp": "13:30:47"
-    },
-    {
-        "date": "2026-09-13",
-        "active_minutes": 7,
-        "stress_spikes_detected": 0,
-        "detected_ides": [
-            "Code.exe"
-        ],
-        "timestamp": "13:59:42"
-    },
-    {
-        "date": "2026-09-13",
+        "date": "2026-09-15",
         "active_minutes": 1,
         "stress_spikes_detected": 0,
-        "detected_ides": [
-            "Code.exe"
-        ],
-        "timestamp": "20:16:45"
+        "timestamp": "17:24:19"
     }
 ]
