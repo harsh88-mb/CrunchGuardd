@@ -4,5 +4,11 @@
         "active_minutes": 1,
         "stress_spikes_detected": 0,
         "timestamp": "17:24:19"
+    },
+    {
+        "date": "2026-09-15",
+        "active_minutes": 136,
+        "stress_spikes_detected": 20,
+        "timestamp": "23:24:26"
     }
 ]
