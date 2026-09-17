@@ -9,10 +9,11 @@ import os
 
 # --- Setup, Configuration & State ---
 session_minutes = 0
-next_break_threshold = 50  # Default 3-hour limit
+next_break_threshold = 180  # Default 3-hour limit (Change to 5 for demo)
 stress_score = 0
 backspace_burst = 0
-cumulative_stress = 0  # New variable to track long-term stress
+cumulative_stress = 0  
+total_stress_events = 0  # Permanent counter for accurate JSON logging
 session_start_time = datetime.now()
 LOG_FILE = "crunchguard_log.json"
 
@@ -37,16 +38,17 @@ def save_session_log(total_minutes, stress_count):
     data.append(log_entry)
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=4)
-    print(f"\n[CrunchGuard] Session saved to {LOG_FILE}: {total_minutes} mins tracked.")
+    print(f"\n[CrunchGuard] Session saved to {LOG_FILE}: {total_minutes} mins tracked, {stress_count} spikes logged.")
 
 # --- Background Keystroke Listener (Stress Detection) ---
 def on_press(key):
-    global stress_score, backspace_burst
+    global stress_score, backspace_burst, total_stress_events
     try:
         if key == keyboard.Key.backspace:
             backspace_burst += 1
-            if backspace_burst > 3:
-                stress_score += 50
+            if backspace_burst > 15:  # Change to 3 for quick demo
+                stress_score += 10    # Change to 50 for quick demo
+                total_stress_events += 1  
                 backspace_burst = 0 
                 print(f"[Stress Alert] Frustration spike detected! Score: {stress_score}")
         else:
@@ -75,7 +77,7 @@ def prompt_user_break():
     
     if wants_to_stop:
         session_minutes = 0
-        next_break_threshold = 50
+        next_break_threshold = 180
         notification.notify(
             title="CrunchGuard: Break Started",
             message="Great job! Step away from the screen and stretch.",
@@ -130,7 +132,7 @@ def show_critical_warning():
     root.mainloop()
 
 print("=" * 50)
-print("CrunchGuard v1.2 Active: Monitoring background time, keystrokes & logging.")
+print("CrunchGuard v1.3 Active: Monitoring background time, keystrokes & logging.")
 print(f"Session started at: {session_start_time.strftime('%H:%M:%S')}")
 print("=" * 50)
 
@@ -146,7 +148,7 @@ try:
             prompt_user_break()
         
         if stress_score >= 50:
-            cumulative_stress += 150
+            cumulative_stress += 25  # Change to 150 for quick demo
             print(f"[CrunchGuard] Cumulative stress increased to {cumulative_stress}/300.")
             
             if cumulative_stress >= 300:
@@ -163,5 +165,5 @@ try:
             stress_score = 0  # Reset local stress score after processing
 
 except KeyboardInterrupt:
-    save_session_log(session_minutes, cumulative_stress)
+    save_session_log(session_minutes, total_stress_events)
     print("\n[CrunchGuard] Shutting down safely. Keep crushing your project!")
