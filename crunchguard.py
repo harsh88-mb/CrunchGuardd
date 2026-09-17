@@ -9,7 +9,7 @@ import os
 
 # --- Setup, Configuration & State ---
 session_minutes = 0
-next_break_threshold = 180  # Default 3-hour limit (Change to 5 for demo)
+next_break_threshold = 50 # Default 3-hour limit (Change to 5 for demo)
 stress_score = 0
 backspace_burst = 0
 cumulative_stress = 0  
@@ -77,7 +77,7 @@ def prompt_user_break():
     
     if wants_to_stop:
         session_minutes = 0
-        next_break_threshold = 180
+        next_break_threshold = 50
         notification.notify(
             title="CrunchGuard: Break Started",
             message="Great job! Step away from the screen and stretch.",
@@ -148,7 +148,7 @@ try:
             prompt_user_break()
         
         if stress_score >= 50:
-            cumulative_stress += 25  # Change to 150 for quick demo
+            cumulative_stress += 100  # Change to 150 for quick demo
             print(f"[CrunchGuard] Cumulative stress increased to {cumulative_stress}/300.")
             
             if cumulative_stress >= 300:

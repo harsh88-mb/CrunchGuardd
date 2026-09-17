@@ -40,5 +40,29 @@
         "active_minutes": 35,
         "stress_spikes_detected": 0,
         "timestamp": "22:35:57"
+    },
+    {
+        "date": "2026-09-17",
+        "active_minutes": 2,
+        "stress_spikes_detected": 0,
+        "timestamp": "22:52:10"
+    },
+    {
+        "date": "2026-09-17",
+        "active_minutes": 2,
+        "stress_spikes_detected": 8,
+        "timestamp": "23:03:52"
+    },
+    {
+        "date": "2026-09-17",
+        "active_minutes": 90,
+        "stress_spikes_detected": 2,
+        "timestamp": "23:05:51"
+    },
+    {
+        "date": "2026-09-17",
+        "active_minutes": 47,
+        "stress_spikes_detected": 18,
+        "timestamp": "23:06:45"
     }
 ]
